@@ -1,3 +1,3 @@
 # SwiftUIDateGrid
 
-A description of this package.
+Yet another calendar component for SwiftUI

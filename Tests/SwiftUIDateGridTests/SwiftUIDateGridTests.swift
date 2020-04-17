@@ -6,7 +6,7 @@ final class SwiftUIDateGridTests: XCTestCase {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        XCTAssertEqual(SwiftUIDateGrid().text, "Hello, World!")
+        XCTAssertEqual("Test", "Test")
     }
 
     static var allTests = [
