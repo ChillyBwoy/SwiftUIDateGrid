@@ -1,9 +1,3 @@
-//
-//  File.swift
-//  
-//
-//  Created by Eugene Cheltsov on 18.04.2020.
-//
 #if os(iOS)
   import SwiftUI
 

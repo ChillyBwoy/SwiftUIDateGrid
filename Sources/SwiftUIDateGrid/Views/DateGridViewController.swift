@@ -1,13 +1,6 @@
-//
-//  File.swift
-//  
-//
-//  Created by Eugene Cheltsov on 18.04.2020.
-//
-
-import SwiftUI
-
 #if os(iOS)
+  import SwiftUI
+
   @available(iOS 13.0, *)
   struct DateGridViewController: UIViewControllerRepresentable {
     var manager: DateGridManager
