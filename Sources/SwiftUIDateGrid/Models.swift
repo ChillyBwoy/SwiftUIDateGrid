@@ -1,37 +1,26 @@
-//
-//  File.swift
-//  
-//
-//  Created by Eugene Cheltsov on 18.04.2020.
-//
+import Combine
+import SwiftUI
 
-#if os(iOS)
-  import Combine
-  import SwiftUI
+public struct DateGridDay {
+  let num: Int
+  let date: Date
+  let isToday: Bool
+  let isWeekend: Bool
+  let isCurrentMonth: Bool
+  let matchedDates: Int
+}
 
-  struct DateGridDay {
-    let num: Int
-    let date: Date
-    let isToday: Bool
-    let isWeekend: Bool
-    let isCurrentMonth: Bool
-    let matchedDates: Int
-  }
+struct DateGridWeek {
+  let weekOfYear: Int
+  let days: [DateGridDay]
+}
 
-  struct DateGridWeek {
-    let weekOfYear: Int
-    let days: [DateGridDay]
-  }
+struct DateGridMonth {
+  let date: Date
+  let weeks: [DateGridWeek]
+}
 
-  struct DateGridMonth {
-    let date: Date
-    let weeks: [DateGridWeek]
-  }
-
-  struct DateGridStyle {
-    let bgColor: Color
-    let bgTextColor: Color
-    let bgGradient: Gradient
-    let textColor: Color
-  }
-#endif
+public struct DateGridStyle {
+  var background: Color
+  var foregroundColor: Color
+}
