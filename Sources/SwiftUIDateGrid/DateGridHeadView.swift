@@ -26,4 +26,3 @@ struct DateGridHeadView_Previews: PreviewProvider {
     DateGridHeadView(date: Date())
   }
 }
-

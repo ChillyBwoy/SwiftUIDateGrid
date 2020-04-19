@@ -1,32 +1,36 @@
 import SwiftUI
 
-fileprivate struct DateGridDayPosition: ViewModifier {
+fileprivate struct DateGridDayLabelWithCircle: ViewModifier {
+  var style: DateGridDayStyle
+
   func body(content: Content) -> some View {
-    GeometryReader { geom in
+    content.background(Circle().fill(style.background))
+  }
+}
+
+fileprivate struct DateGridDayLabelWithInfo: ViewModifier {
+  @EnvironmentObject var theme: DateGridTheme
+  var day: DateGridDay
+  var style: DateGridDayStyle
+
+  func body(content: Content) -> some View {
+    ZStack(alignment: .bottom) {
       content
-        .frame(
-          width: geom.size.width,
-          height: geom.size.height,
-          alignment: .center
-        )
+      HStack(alignment: .center, spacing: 2) {
+        ForEach(1...day.matchedDates, id: \.self) { _ in
+          Circle()
+            .fill(self.style.background)
+            .frame(width: 5, height: 5, alignment: .center)
+        }
+      }
     }
   }
 }
 
-fileprivate struct DateGridDayLabelMarked: ViewModifier {
-  var style: DateGridStyle
-
-  func body(content: Content) -> some View {
-    content
-      .background(Circle().fill(style.background))
-  }
-  
-}
-
 fileprivate struct DateGridDayLabelView: View {
-  var date: Date
-  var style: DateGridStyle
-  
+  var day: DateGridDay
+  var style: DateGridDayStyle
+
   private let dateFormatter: DateFormatter = {
     let formatter = DateFormatter()
     formatter.dateFormat = "d"
@@ -34,10 +38,16 @@ fileprivate struct DateGridDayLabelView: View {
   }()
 
   var body: some View {
-    Text("\(date, formatter: dateFormatter)")
-      .foregroundColor(style.foregroundColor)
-      .modifier(DateGridDayPosition())
-      .padding(2)
+    GeometryReader { geom in
+      Text("\(self.day.date, formatter: self.dateFormatter)")
+        .foregroundColor(self.style.foregroundColor)
+        .frame(
+          width: geom.size.width,
+          height: geom.size.height,
+          alignment: .center
+        )
+        .padding(2)
+    }
   }
 }
 
@@ -47,28 +57,20 @@ struct DateGridDayView: View {
 
   var body: some View {
     Button(action: {
-      print(self.day)
+      debugPrint(self.day)
     }) {
       if self.day.isToday {
-        DateGridDayLabelView(date: day.date, style: theme.today)
-          .modifier(DateGridDayLabelMarked(style: theme.today))
+        DateGridDayLabelView(day: day, style: theme.today)
+          .modifier(DateGridDayLabelWithCircle(style: theme.today))
       } else if self.day.matchedDates > 0 {
-        ZStack(alignment: .bottom) {
-          DateGridDayLabelView(date: day.date, style: theme.selected)
-          HStack(alignment: .center, spacing: 2) {
-            ForEach(1...self.day.matchedDates, id: \.self) { _ in
-              Circle()
-                .fill(self.theme.selected.background)
-                .frame(width: 5, height: 5, alignment: .center)
-            }
-          }
-        }
+        DateGridDayLabelView(day: day, style: theme.selected)
+          .modifier(DateGridDayLabelWithInfo(day: day, style: theme.selected))
       } else if !self.day.isCurrentMonth {
-        DateGridDayLabelView(date: day.date, style: theme.day)
+        DateGridDayLabelView(day: day, style: theme.inactive)
       } else if self.day.isWeekend {
-        DateGridDayLabelView(date: day.date, style: theme.weekend)
+        DateGridDayLabelView(day: day, style: theme.weekend)
       } else {
-        DateGridDayLabelView(date: day.date, style: theme.day)
+        DateGridDayLabelView(day: day, style: theme.day)
       }
     }
     .foregroundColor(.primary)
@@ -78,7 +80,8 @@ struct DateGridDayView: View {
 struct DateGridDayView_Previews: PreviewProvider {
   static var previews: some View {
     let calendar = Calendar.current
-    let date = calendar.date(from: DateComponents(calendar: calendar, year: 2019, month: 9, day: 18))!
+    let date = calendar.date(
+      from: DateComponents(calendar: calendar, year: 2019, month: 9, day: 18))!
     let dayNum = calendar.dateComponents([.day], from: date)
 
     return Group {

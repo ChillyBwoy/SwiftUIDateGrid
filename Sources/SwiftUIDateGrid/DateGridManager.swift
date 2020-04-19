@@ -28,7 +28,7 @@ struct DateGridManager {
   }
 
   fileprivate func selectedTimes(date: Date, selectedDates: [Date]) -> Int {
-    let matched = selectedDates.filter { (selectedDate) -> Bool in
+    let matched = selectedDates.filter { selectedDate -> Bool in
       self.calendar.isDate(date, equalTo: selectedDate, toGranularity: .day)
     }
 
@@ -39,6 +39,7 @@ struct DateGridManager {
     var dc = calendar.dateComponents([.year, .month], from: date)
     dc.calendar = calendar
     dc.day = day
+
     let currentDate = calendar.date(from: dc)!
     let dayNum = calendar.dateComponents([.day], from: currentDate)
 
@@ -52,7 +53,9 @@ struct DateGridManager {
     )
   }
 
-  fileprivate func mapDays(from range: Range<Int>, for date: Date, selectedDates: [Date]) -> [DateGridDay] {
+  fileprivate func mapDays(from range: Range<Int>, for date: Date, selectedDates: [Date])
+    -> [DateGridDay]
+  {
     return range.map { day -> DateGridDay in
       self.calendarDay(for: day, of: date, selectedDates: selectedDates)
     }
@@ -65,7 +68,7 @@ struct DateGridManager {
     let start = calendar.component(.weekday, from: firstDate) - calendar.firstWeekday - 1
     let finish = 42 - start
 
-    return (-start ..< finish)
+    return (-start..<finish)
   }
 }
 
@@ -77,13 +80,17 @@ extension DateGridManager {
 
     let weeks = stride(from: 0, to: days.count, by: length).map { d -> DateGridWeek in
       let days = Array(days[d..<min(d + length, days.count)])
-      let firstDay = days[0].date
-
-      let dc = calendar.dateComponents([.weekOfYear], from: firstDay)
+      let dc = calendar.dateComponents([.weekOfYear], from: days[0].date)
 
       return DateGridWeek(weekOfYear: dc.weekOfYear!, days: days)
     }
 
     return DateGridMonth(date: date, weeks: weeks)
+  }
+}
+
+extension DateGridManager {
+  func year(for yearNum: Int, selectedDates: [Date] = []) -> DateGridYear {
+    DateGridYear(year: yearNum, monthes: [])
   }
 }

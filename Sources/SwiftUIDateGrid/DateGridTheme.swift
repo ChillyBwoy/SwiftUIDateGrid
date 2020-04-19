@@ -1,20 +1,35 @@
 import SwiftUI
 
+public struct DateGridDayStyle {
+  public var background: Color
+  public var foregroundColor: Color
+
+  public init(background: Color, foregroundColor: Color) {
+    self.background = background
+    self.foregroundColor = foregroundColor
+  }
+}
+
 public class DateGridTheme: ObservableObject {
-  var today: DateGridStyle = DateGridStyle(
+  public var today: DateGridDayStyle = DateGridDayStyle(
     background: Color(UIColor.systemBlue),
     foregroundColor: .white)
 
-  var day: DateGridStyle = DateGridStyle(
+  public var day: DateGridDayStyle = DateGridDayStyle(
     background: .clear,
     foregroundColor: .accentColor)
 
-  var selected: DateGridStyle = DateGridStyle(
+  public var selected: DateGridDayStyle = DateGridDayStyle(
     background: Color(UIColor.systemBlue),
     foregroundColor: .accentColor)
 
-  var weekend: DateGridStyle = DateGridStyle(
+  public var weekend: DateGridDayStyle = DateGridDayStyle(
     background: .clear,
-    foregroundColor: Color(UIColor.systemRed)
-  )
+    foregroundColor: Color(UIColor.systemRed))
+
+  public var inactive: DateGridDayStyle = DateGridDayStyle(
+    background: .clear,
+    foregroundColor: Color(UIColor.systemGray))
+
+  public init() {}
 }

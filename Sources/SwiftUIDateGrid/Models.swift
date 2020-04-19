@@ -1,7 +1,7 @@
 import Combine
 import SwiftUI
 
-public struct DateGridDay {
+struct DateGridDay {
   let num: Int
   let date: Date
   let isToday: Bool
@@ -20,7 +20,7 @@ struct DateGridMonth {
   let weeks: [DateGridWeek]
 }
 
-public struct DateGridStyle {
-  var background: Color
-  var foregroundColor: Color
+struct DateGridYear {
+  let year: Int
+  let monthes: [DateGridMonth]
 }

@@ -25,6 +25,8 @@ struct CalendarMonthView_Previews: PreviewProvider {
   static var previews: some View {
     DateGridMonthView(
       month: DateGridManager().month(for: Date())
-    ).environment(\.locale, Locale(identifier: "ru_RU"))
+    )
+    .environmentObject(DateGridTheme())
+    .environment(\.locale, Locale(identifier: "ru_RU"))
   }
 }
