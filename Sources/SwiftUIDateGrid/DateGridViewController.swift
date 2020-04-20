@@ -1,12 +1,14 @@
 import SwiftUI
 
 fileprivate enum DateGridViewControllerDirection: Int {
-  case up = 1
-  case down = -1
+  case after = 1
+  case before = -1
 }
 
 fileprivate class DateGridViewControllerCache {
-  private let dateFormatterForCacheKey: DateFormatter = {
+  var createViewController: (_ date: Date) -> UIViewController
+
+  private let dateFormatter: DateFormatter = {
     let dateFormatter = DateFormatter()
     dateFormatter.dateFormat = "yyyy-MM"
     return dateFormatter
@@ -15,52 +17,57 @@ fileprivate class DateGridViewControllerCache {
   private var data: [String: UIViewController] = [:]
 
   private func getCacheKey(for date: Date) -> String {
-    return dateFormatterForCacheKey.string(from: date)
+    return dateFormatter.string(from: date)
+  }
+  
+  init(createViewController: @escaping (_ date: Date) -> UIViewController) {
+    self.createViewController = createViewController
   }
 
-  func controller(for date: Date, createController: @escaping () -> UIViewController)
-    -> UIViewController
-  {
+  func controller(for date: Date) -> UIViewController {
     let key = getCacheKey(for: date)
-    if let controller = data[key] {
-      return controller
+    if let viewController = data[key] {
+      return viewController
     }
 
-    let newController = createController()
-    data[key] = newController
-    return newController
+    let newViewController = createViewController(date)
+    data[key] = newViewController
+
+    return newViewController
   }
 }
 
 struct DateGridViewController: UIViewControllerRepresentable {
   var manager: DateGridManager
   @Binding var date: Date
-  var createViewController: () -> UIViewController
-
-  private let cache = DateGridViewControllerCache()
+  private let cache: DateGridViewControllerCache
+  
+  init(manager: DateGridManager, date: Binding<Date>, createViewController: @escaping (_ date: Date) -> UIViewController) {
+    self.manager = manager
+    self._date = date
+    self.cache = DateGridViewControllerCache(createViewController: createViewController)
+  }
 
   func makeCoordinator() -> DateGridViewController.Coordinator {
     Coordinator(self)
   }
 
   func makeUIViewController(context: Context) -> UIPageViewController {
-    let pageViewController = UIPageViewController(
+    let viewController = UIPageViewController(
       transitionStyle: .scroll,
       navigationOrientation: .horizontal)
 
-    pageViewController.dataSource = context.coordinator
-    pageViewController.delegate = context.coordinator
+    viewController.dataSource = context.coordinator
+    viewController.delegate = context.coordinator
 
-    return pageViewController
+    return viewController
   }
 
   func updateUIViewController(_ pageViewController: UIPageViewController, context _: Context) {
     let firstViewController = pageViewController.viewControllers?.first
-
-    let viewController =
-      firstViewController != nil
+    let viewController = firstViewController != nil
       ? firstViewController!
-      : createViewController()
+      : cache.controller(for: date)
 
     pageViewController.setViewControllers(
       [viewController],
@@ -75,38 +82,27 @@ struct DateGridViewController: UIViewControllerRepresentable {
       parent = pageViewController
     }
 
-    fileprivate func nextViewController(direction: DateGridViewControllerDirection)
-      -> UIViewController
-    {
-      parent.date = parent.manager.calendar.date(
-        byAdding: .month, value: direction.rawValue, to: parent.date)!
-      return parent.cache.controller(
-        for: parent.date, createController: parent.createViewController)
+    fileprivate func getViewController(direction: DateGridViewControllerDirection) -> UIViewController {
+      let calendar = parent.manager.calendar
+      let newDate = calendar.date(byAdding: .month, value: direction.rawValue, to: parent.date)!
+      return parent.cache.controller(for: newDate)
     }
 
-    func pageViewController(_: UIPageViewController, viewControllerBefore _: UIViewController)
-      -> UIViewController?
-    {
-      return nextViewController(direction: .down)
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
+      return getViewController(direction: .before)
     }
 
-    func pageViewController(_: UIPageViewController, viewControllerAfter _: UIViewController)
-      -> UIViewController?
-    {
-      return nextViewController(direction: .up)
+    func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
+      return getViewController(direction: .after)
     }
-
-    func pageViewController(
-      _ pageViewController: UIPageViewController, didFinishAnimating _: Bool,
-      previousViewControllers: [UIViewController], transitionCompleted completed: Bool
-    ) {
+    
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
       if completed {
-        guard
-          let prevController = previousViewControllers.first
-            as? UIHostingController<DateGridMonthView>,
-          let currController = pageViewController.viewControllers?.first
-            as? UIHostingController<DateGridMonthView>
-        else {
+        guard let prevController = previousViewControllers.first as? UIHostingController<DateGridMonthView> else {
+          return
+        }
+
+        guard let currController = pageViewController.viewControllers?.first as? UIHostingController<DateGridMonthView> else {
           return
         }
 
@@ -128,5 +124,9 @@ struct DateGridViewController: UIViewControllerRepresentable {
         }
       }
     }
+    
+//    func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+//      let itemController = pendingViewControllers.first
+//    }
   }
 }

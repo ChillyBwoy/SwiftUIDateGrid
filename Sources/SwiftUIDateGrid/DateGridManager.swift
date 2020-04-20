@@ -1,7 +1,7 @@
 import Combine
 import SwiftUI
 
-struct DateGridManager {
+class DateGridManager {
   var calendar: Calendar
 
   var weekdaySymbols: [String] {
@@ -73,7 +73,7 @@ struct DateGridManager {
 }
 
 extension DateGridManager {
-  func month(for date: Date, selectedDates: [Date] = []) -> DateGridMonth {
+  func monthData(for date: Date, selectedDates: [Date] = []) -> DateGridMonth {
     let range = monthRange(from: date)
     let days = mapDays(from: range, for: date, selectedDates: selectedDates)
     let length = calendar.maximumRange(of: .weekday)!.count
@@ -86,11 +86,5 @@ extension DateGridManager {
     }
 
     return DateGridMonth(date: date, weeks: weeks)
-  }
-}
-
-extension DateGridManager {
-  func year(for yearNum: Int, selectedDates: [Date] = []) -> DateGridYear {
-    DateGridYear(year: yearNum, monthes: [])
   }
 }

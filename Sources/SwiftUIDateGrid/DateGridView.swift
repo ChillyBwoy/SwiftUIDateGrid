@@ -21,10 +21,10 @@ public struct DateGridView: View {
       DateGridViewController(
         manager: manager,
         date: $date,
-        createViewController: {
-          let rootView = DateGridMonthView(
-            month: self.manager.month(for: self.date, selectedDates: self.selectedDates)
-          ).environmentObject(self.theme)
+        createViewController: { date in
+          let month = self.manager.monthData(for: date, selectedDates: self.selectedDates)
+          let rootView = DateGridMonthView(month: month).environmentObject(self.theme)
+
           return UIHostingController(rootView: rootView)
         }
       )
